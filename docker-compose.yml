@@ -1,22 +1,23 @@
 services:
-  votebot:
+  hrbot:
     build:
       context: .
     command: python manage.py app
+    container_name: hrbot
     volumes:
       - .:/usr/src/app/
     env_file:
       - .env
     depends_on:
-      votebotdb:
+      hrbotdb:
         condition: service_healthy
     restart: always
 
-  votebotweb:
+  hrbotweb:
     build:
       context: .
     command: python manage.py runserver 0.0.0.0:8000
-    container_name: djangovote
+    container_name: hrbotweb
     volumes:
       - .:/usr/src/app/
     ports:
@@ -24,17 +25,17 @@ services:
     env_file:
       - .env
     depends_on:
-      votebotdb:
+      hrbotdb:
         condition: service_healthy
     restart: always
 
-  votebotdb:
+  hrbotdb:
     image: postgres:13
-    container_name: postgresvote
+    container_name: hrbotdb
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: votes
+      POSTGRES_DB: hrbot
     ports:
       - "5454:5432"
     volumes:
@@ -46,7 +47,40 @@ services:
       retries: 5
     restart: always
 
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  celery:
+    build:
+      context: .
+    container_name: hrbot_celery
+    command: celery -A core worker --loglevel=info
+    volumes:
+      - .:/usr/src/app/
+    env_file:
+      - .env
+    depends_on:
+      - hrbotdb
+      - redis
+    restart: always
+
+  celery-beat:
+    build:
+      context: .
+    container_name: hrbot_celery_beat
+    command: celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - .:/usr/src/app/
+    env_file:
+      - .env
+    depends_on:
+      - hrbotdb
+      - redis
+    restart: always
+
 volumes:
   postgres_data:
-
-    

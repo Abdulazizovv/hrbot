@@ -1,16 +1,27 @@
-# Use the official Python image
-FROM python:3.12.3-alpine
+# Use Python 3.12 slim image
+FROM python:3.12-slim
 
-# Set the working directory inside the container
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Set working directory
 WORKDIR /usr/src/app
 
-# Prevent Python from writing .pyc files and buffer output
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    curl \
+    build-essential \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-COPY requirements.txt /usr/src/app/requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /usr/src/app/requirements.txt
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the entire project into the container
-COPY . /usr/src/app/
+# Copy project files
+COPY . .
