@@ -155,7 +155,7 @@ class Database:
                 task=task,
                 status='pending',
                 defaults={
-                    'deadline': timezone.now() + timedelta(hours=task.deadline),
+                    'deadline': timezone.localtime() + timedelta(hours=task.deadline),
                 }
             )
 
@@ -317,7 +317,7 @@ class Database:
                 'vacancy': user_task.task.vacancy.id if user_task.task.vacancy else None,
                 'deadline': user_task.deadline.strftime('%Y-%m-%d %H:%M:%S') if user_task.deadline else None,
                 'status': user_task.status,
-                'is_valid': timezone.now() < user_task.deadline if user_task.deadline else False,
+                'is_valid': timezone.localtime() < user_task.deadline if user_task.deadline else False,
                 'created_at': user_task.created_at.strftime('%Y-%m-%d %H:%M:%S'),
                 'updated_at': user_task.updated_at.strftime('%Y-%m-%d %H:%M:%S')
             }

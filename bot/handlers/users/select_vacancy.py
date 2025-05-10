@@ -71,7 +71,7 @@ async def handle_vacancy_selection(message: types.Message, state: FSMContext):
     update_google_sheet.delay(
         user_id=message.from_user.id,
         step="timestamp",
-        data=timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+        data=timezone.localtime().strftime('%Y-%m-%d %H:%M:%S')
     )
     await db.save_application_partially(
         user_id=message.from_user.id,
@@ -145,20 +145,22 @@ async def handle_phone_input_text(message: types.Message, state: FSMContext):
     Handle the user's input of their phone number.
     """
     if message.text == "🔙 Orqaga":
-        vacancies = await db.get_active_vacancies()
+        await message.answer("Ismingizni kiriting.", reply_markup=back_keyboard())
+        await state.set_state("name_input")
+        return
 
-        if vacancies:
-            await message.answer(
-                "Tanlang 👇\n",
-                reply_markup=vacancies_keyboard(vacancies)
-            )
-            await state.set_state("vacancy_selection")
-            return
-        else:
-            await message.answer("Hozirda bo'sh ish o'rinlari mavjud emas.\n", reply_markup=types.ReplyKeyboardRemove())
-            return
-
-    await message.answer("Iltimos, telefon raqamingizni yuboring.", reply_markup=back_keyboard())
+    await message.answer("Iltimos, telefon raqamingizni yuboring.", reply_markup=types.ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                types.KeyboardButton(text="📞 Telefon raqamni yuborish", request_contact=True),
+            ],
+            [
+                types.KeyboardButton(text="🔙 Orqaga"),
+            ]
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True
+    ))
     await state.set_state("phone_input")
 
 
@@ -352,7 +354,7 @@ async def handle_about_input(message: types.Message, state: FSMContext):
             await db.update_user_task(
                 user_task_id=user_task['id'],
                 field='started_at',
-                value=timezone.now()
+                value=timezone.localtime()
             )
             # update_google_sheet.delay(
             #     user_id=message.from_user.id,
@@ -363,7 +365,7 @@ async def handle_about_input(message: types.Message, state: FSMContext):
             # update_google_sheet.delay(
             #     user_id=message.from_user.id,
             #     step="task_start",
-            #     data=timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+            #     data=timezone.localtime().strftime('%Y-%m-%d %H:%M:%S')
             # )
             # update_google_sheet.delay(
             #     user_id=message.from_user.id,
@@ -388,7 +390,7 @@ async def handle_about_input(message: types.Message, state: FSMContext):
                 kwargs={
                     'user_id': message.from_user.id,
                     'step': 'task_start',
-                    'data': timezone.now().strftime('%Y-%m-%d %H:%M:%S')
+                    'data': timezone.localtime().strftime('%Y-%m-%d %H:%M:%S')
                 },
                 countdown=2  # 2 soniyadan keyin bajariladi
             )

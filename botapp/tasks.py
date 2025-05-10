@@ -100,7 +100,7 @@ def check_task_deadlines():
     logger = logging.getLogger(__name__)
     logger.info("Checking task deadlines...")
 
-    now = timezone.now()
+    now = timezone.localtime()
     upcoming = now + timedelta(days=3)
     tasks = UserTask.objects.filter(status="pending")
     logger.info(f"Found {tasks.count()} pending tasks.")
@@ -110,8 +110,8 @@ def check_task_deadlines():
     
     for task in tasks:
         timeleft = task.deadline - now
-        now = timezone.now()
-
+        now = timezone.localtime()
+        print(f"Task {task.id} deadline: {task.deadline}, time left: {timeleft}")
         if now > task.deadline:
             logger.info(f"Task {task.id} deadline has passed.")
             task.status = 'rejected'
@@ -125,12 +125,12 @@ def check_task_deadlines():
             except Exception as e:
                 logger.error(f"Failed to send message to user {task.user.user_id}: {e}")
             return
-        elif timeleft <= timedelta(days=1):
+        elif timeleft <= timedelta(hours=24):
             logger.info(f"Task {task.id} deadline is approaching.")
             try:
                 bot.send_message(
                     chat_id=task.user.user_id,
-                    text=f"⏰ Diqqat! Sizning vazifangiz uchun {task.deadline.strftime('%Y-%m-%d')} sanasigacha atigi 3 kun qoldi."
+                    text=f"⏰ Diqqat! Sizning vazifangiz uchun {task.deadline.strftime('%Y-%m-%d')} sanasigacha atigi {format_timedelta(timeleft)} kun qoldi."
                 )
                 sleep(0.3)
             except Exception as e:

@@ -15,7 +15,7 @@ def write_to_google_sheet(user_id, step, data):
     for i in reversed(range(len(all_values))):
         row = all_values[i]
         if row and row[0] == str(user_id):
-            last_status = row[13] if len(row) > 13 else ''  # Status is in 12th col (index 11)
+            last_status = row[12] if len(row) > 12 else ''  # Status is in 12th col (index 11)
             print(f"Last status for user {user_id}: {last_status}")
             if last_status in ['Vazifa bajarildi', 'Tasdiqlandi', 'Bekor qilindi']:
             # if not last_status or not last_status == "Yangi":

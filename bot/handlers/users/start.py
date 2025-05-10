@@ -29,8 +29,8 @@ async def bot_start(message: types.Message, state: FSMContext):
         if task['status'] == 'pending':
             await message.answer(
                 "Sizda hali topshiriq mavjud. Iltimos, topshirig'ingizni bajaring.\n" \
-                "Sizga topshirilgan topshiriq:\n" \
-                f"{task['task']}\n" \
+                "Sizga topshirilgan topshiriq:\n\n" \
+                f"{task['task']}\n\n" \
                 f"Muddati: {task['deadline']}\n\n" \
                 "Iltimos, topshirig'ingizni bajaring.",
                 reply_markup=send_task_keyboard(task_id=task['id']) # topshiriqni ko'rish uchun kerakli tugma

@@ -23,7 +23,7 @@ async def select_deadline(call: types.CallbackQuery, callback_data: dict, state:
     if user_task:
         await db.update_user_task(task_id, 'user_deadline', deadline)
         days = int(deadline.split()[0]  if deadline.split()[0].isdigit() else 1)
-        await db.update_user_task(task_id, 'deadline', timezone.now() + timedelta(days=days))
+        await db.update_user_task(task_id, 'deadline', timezone.localtime() + timedelta(days=days))
         
         update_google_sheet.apply_async(
                 kwargs={

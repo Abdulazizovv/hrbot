@@ -82,11 +82,11 @@ async def handle_send_task_link(message: types.Message, state: FSMContext):
                                  "Siz bilan bog'lanamiz.\n"
                                  "Rahmat!")
             await db.update_user_task(user_task_id=task['id'], field='status', value='sent')
-            await db.update_user_task(user_task_id=task['id'], field='finished_at', value=timezone.now())
+            await db.update_user_task(user_task_id=task['id'], field='finished_at', value=timezone.localtime())
             update_google_sheet.delay(
                 user_id=message.from_user.id,
                 step='task_end',
-                data=timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
+                data=timezone.localtime().strftime('%Y-%m-%d %H:%M:%S'),
             )
             update_google_sheet.delay(
                 user_id=message.from_user.id,
